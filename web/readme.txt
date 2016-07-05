@@ -1,0 +1,1 @@
+wjebaj aktualny kod strony i tutaj wpisuj uwagi i wyjaœnienia

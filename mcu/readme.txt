@@ -1,0 +1,1 @@
+wjebaj aktualny kod z mcu i tutaj wpisuj uwagi i wyjaœnienia

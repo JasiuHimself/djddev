@@ -6,3 +6,6 @@ Jeszcze nie wiem jak to sie robi ale trzeba przyjebac jakies branche i tam wszys
 
 BOGDAN PIES
 
+
+w readme folderów mo¿na ³adowaæ uwagi i wyjaœnienia, a ewentualne problemy do rozwiazania czy listy TODO to mo¿na nomanie prawilnie otwieraæ issues, tak jak to robio profesjonalni korpoœmiecie
+
