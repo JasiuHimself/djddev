@@ -105,7 +105,8 @@
         android:layout_below="@+id/editTextUserPassword"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp"
-        android:clickable="true" />
+        android:clickable="true"
+        android:onClick="passwordReminder" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -113,8 +114,9 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/register"
         android:id="@+id/textViewLoginRegister"
+        android:layout_marginTop="40dp"
+        android:clickable="true"
         android:layout_below="@+id/textViewLoginForgotPassword"
-        android:layout_alignStart="@+id/textViewLoginForgotPassword"
-        android:layout_marginTop="30dp"
-        android:clickable="true" />
+        android:layout_alignStart="@+id/buttonUserLogin"
+        android:onClick="redirectToRegistration" />
 </RelativeLayout>

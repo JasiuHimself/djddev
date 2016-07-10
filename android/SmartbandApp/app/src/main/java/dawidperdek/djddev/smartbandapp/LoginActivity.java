@@ -30,4 +30,12 @@ public class LoginActivity extends AppCompatActivity {
     private boolean checkCredentials(String login, String password) {
         return login.equalsIgnoreCase(password);
     }
+
+    public void redirectToRegistration(View view) {
+        Toast.makeText(this, "Redirect to registration.", Toast.LENGTH_SHORT).show();
+    }
+
+    public void passwordReminder(View view) {
+        Toast.makeText(this, "Password reminder.", Toast.LENGTH_SHORT).show();
+    }
 }

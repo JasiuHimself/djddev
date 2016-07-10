@@ -7,7 +7,7 @@
     <string name="djddev">DJD DEVELOPMENT</string>
     <string name="djddev_authors">D. Perdek, J. Chodorowski, D. Śliwa</string>
     <string name="forgot_password"><u>Forgot your password?</u></string>
-    <string name="register"><u>Doesn't have account?</u></string>
+    <string name="register"><u>Want to register?</u></string>
 
     <string name="title_activity_user_main">UserMainActivity</string>
     <string name="dummy_button">Dummy Button</string>
