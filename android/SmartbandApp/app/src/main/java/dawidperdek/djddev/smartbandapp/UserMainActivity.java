@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -42,22 +43,22 @@ public class UserMainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user_main);
 
         mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
+        mControlsView = findViewById(R.id.drawerPane);
+        mContentView = findViewById(R.id.fullscreenwithdrawer);
 
 
         // Set up the user interaction to manually show or hide the system UI.
         mContentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggle();
+                Toast.makeText(getApplicationContext(), "Click!", Toast.LENGTH_SHORT).show();
             }
         });
 
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+//        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
     }
 
     @Override
@@ -105,6 +106,21 @@ public class UserMainActivity extends AppCompatActivity {
         // Schedule a runnable to remove the status and navigation bar after a delay
         mHideHandler.removeCallbacks(mShowPart2Runnable);
         mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
+    }
+
+    public void show(View view) {
+        mControlsView.setVisibility(View.VISIBLE);
+        mVisible = true;
+    }
+
+    public void toggle(View view) {
+        if (mVisible) {
+            mControlsView.setVisibility(View.GONE);
+        }
+        else {
+            mControlsView.setVisibility(View.VISIBLE);
+        }
+        mVisible = !mVisible;
     }
 
     private final Runnable mHidePart2Runnable = new Runnable() {
