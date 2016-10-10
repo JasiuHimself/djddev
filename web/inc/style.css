@@ -1,0 +1,28 @@
+.invalidFormField{
+	color:red;
+}
+
+.validFormField{
+	background-color:green;
+}
+
+.day{
+	width: 10px;
+	height: 10px;
+	background-color: red;
+}
+
+
+.hour{
+	width: 10px;
+	height: 10px;
+	background-color: blue;
+
+}
+
+
+#calendar{
+	position: absolute;
+	left: 0;
+	top: 0;
+}

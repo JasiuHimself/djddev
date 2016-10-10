@@ -1,0 +1,9 @@
+RewriteEngine On
+
+
+RewriteRule ^register/$ register.php
+RewriteRule ^logout$ index.php?logout=true
+RewriteRule ^profile$ profile.php
+
+#RewriteCond %{REQUEST_URI} !^/project/
+#RewriteRule ^(.*)$ /project/$1 [L,R=301]

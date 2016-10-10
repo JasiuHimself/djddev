@@ -1,0 +1,16 @@
+rank użytkownika
+0 - admin
+1 - moderator
+2 - zwykły użytkownik
+3 - zwykły użytkownik nie potwierdzony
+9 - banned
+
+
+activate account 
+header
+
+create account 
+activation link
+
+ustawić chrona na wypierdzielanie niepotwierdzonych kont, z resztą po to jest data przy haszu
+NA RAZIE MOŻNA NAPISAĆ RĘCZNE WYWALANIE GUZICZKIEM!
