@@ -2,10 +2,10 @@ Co jest zrobione:
 
 -wczytanie danych z pliku
 -filtracja filtrem Butterwortha 10 rzędu
+-obliczenie normy ze względnu na brak znaczenia orientacji - nie mam jak tego zrobić bo
 
 
 do zrobienia
-obliczenie normy ze względnu na brak znaczenia orientacji
 
 
 
