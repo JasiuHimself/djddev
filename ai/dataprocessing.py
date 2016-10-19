@@ -3,6 +3,8 @@ from scipy.signal import butter, lfilter
 import matplotlib.pyplot as plt
 import math
 
+
+
 def column(matrix, i):
     return [row[i] for row in matrix]
 
@@ -15,18 +17,34 @@ def norm(vector1, vector2, vector3, cutDC = False, N = 500):
 def normWithoutDC(norm, N):
     normWithoutDC = []
     for n in range(0, len(norm)):
-        for l in range(0,N-1):
+        for l in range(0,N):
+            sumator = norm[n-l]
+        normWithoutDC.append(norm[n]-((1.0/N)*sumator))
+    return normWithoutDC
+
+#aka srednia arytmetyczna
+def signalEnergy(signal,N):
+    sumator = 0
+    for n in range(0,N):
+        print sumator
+        sumator += signal[n]
+
+    return (1.0/N)*sumator
+
+def signalVariance(signal,N):
+    meanValue = signalEnergy(signal,N)
+    for n in range(0, len(norm)):
+        for l in range(0,N):
             sumator = norm[n-l]
         normWithoutDC.append(norm[n]-((1.0/N)*sumator))
     return normWithoutDC
 
 
 
-
 # chce 2.5 sekundy f=200 wiec biere n=500
 N = 500
 # Filter requirements.
-order = 10
+order = 10  # rzad order
 fs = 199      # sample rate, Hz
 cutoff = 15 # desired cutoff frequency of the filter, Hz
 # Get the filter coefficients so we can check its frequency response.
@@ -54,7 +72,7 @@ accZ = column(vector,3)
 
 
 # 200 hz
-def butter_lowpass(cutoff, fs, order=5):
+def butter_lowpass(cutoff, fs, order):
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
@@ -76,5 +94,10 @@ accc = normWithoutDC(accNorm,N)
 # plt.plot(time,accXFiltered,"r", time,accX,"r",
 # time, accYFiltered,"b", time,accY,"b",
 # time,accZFiltered,"g",
+
+
+
 plt.plot(time,accNorm,"r-", time,accc,"b.")
 plt.show()
+aka=[4,4,4,4]
+print signalEnergy(aka,4)
