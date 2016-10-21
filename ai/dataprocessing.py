@@ -1,4 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import string
+import numpy as np
 from scipy.signal import butter, lfilter
 import matplotlib.pyplot as plt
 import math
@@ -28,20 +32,19 @@ def signalEnergy(signal,N):
     for n in range(0,N):
         print sumator
         sumator += signal[n]
-
     return (1.0/N)*sumator
 
 def signalVariance(signal,N):
-    meanValue = signalEnergy(signal,N)
-    for n in range(0, len(norm)):
-        for l in range(0,N):
-            sumator = norm[n-l]
-        normWithoutDC.append(norm[n]-((1.0/N)*sumator))
-    return normWithoutDC
+    sumator = 0
+    meanValue = signalEnergy(signal,N) #signal mean value
+    for n in range(0, N):
+        sumator += pow((signal[n] - meanValue),2)
+    return (1.0/N)*sumator
 
 
 
 # chce 2.5 sekundy f=200 wiec biere n=500
+# wielkość okna analizy
 N = 500
 # Filter requirements.
 order = 10  # rzad order
@@ -91,13 +94,9 @@ accZFiltered = butter_lowpass_filter(accZ,cutoff,fs,order)
 accNorm = norm(accXFiltered,accYFiltered, accZFiltered)
 accc = normWithoutDC(accNorm,N)
 
-# plt.plot(time,accXFiltered,"r", time,accX,"r",
-# time, accYFiltered,"b", time,accY,"b",
-# time,accZFiltered,"g",
-
-
-
 plt.plot(time,accNorm,"r-", time,accc,"b.")
+plt.plot(time,accXFiltered,"r", time,accX,"r", time, accYFiltered,"b", time,accY,"b", time,accZ,"g", time,accZFiltered,"g")
+
+
+
 plt.show()
-aka=[4,4,4,4]
-print signalEnergy(aka,4)
