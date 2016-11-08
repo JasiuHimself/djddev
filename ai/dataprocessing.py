@@ -4,9 +4,10 @@
 import string
 import numpy as np
 from scipy.signal import butter, lfilter
+from scipy.fftpack import fft
 import matplotlib.pyplot as plt
 import math
-
+from time import sleep
 
 
 def column(matrix, i):
@@ -40,6 +41,21 @@ def signalVariance(signal,N):
     for n in range(0, N):
         sumator += pow((signal[n] - meanValue),2)
     return (1.0/N)*sumator
+
+
+def okienko(signal,windowWidth, overlapping =0):
+    flag=0;
+    fig = plt.plot()
+    while (flag<=len(signal)):
+        # fft(vector[])
+        plt.plot(signal[flag:flag+windowWidth-overlapping],"r-")
+        plt.show(fig)
+        fig.clf()
+        plt.close(fig)
+        flag += windowWidth
+
+
+
 
 
 
@@ -94,9 +110,11 @@ accZFiltered = butter_lowpass_filter(accZ,cutoff,fs,order)
 accNorm = norm(accXFiltered,accYFiltered, accZFiltered)
 accc = normWithoutDC(accNorm,N)
 
-plt.plot(time,accNorm,"r-", time,accc,"b.")
-plt.plot(time,accXFiltered,"r", time,accX,"r", time, accYFiltered,"b", time,accY,"b", time,accZ,"g", time,accZFiltered,"g")
+# plt.figure()
+# plt.plot(time,accNorm,"r-", time,accc,"b.")
+# plt.plot(time,accXFiltered,"r", time,accX,"r", time, accYFiltered,"b", time,accY,"b", time,accZ,"g", time,accZFiltered,"g")
 
+okienko(accNorm,100,50)
 
 
 plt.show()
