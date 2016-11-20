@@ -1,52 +1,129 @@
 package com.example.dyzio.sensordatacollector;
 
-import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 
-public class CollectorActivity extends AppCompatActivity {
+import java.io.File;
+import java.io.IOException;
+import java.io.FileWriter;
+
+public class CollectorActivity extends AppCompatActivity implements SensorEventListener {
+    private String LOG_TAG = "SensorDataCollectorLog";
+    private String DIR_NAME = "SensorDataCollector";
+    private File accelerometerFile = null;
+    private File gyroscopeFile = null;
+    private boolean isExternalStorageWriteable = Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
+    private SensorManager sensorManager;
+    private Sensor accelerometer = null;
+    private Sensor gyroscope = null;
+    private boolean collectingData = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collector);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-    }
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_collector, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if (accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        } else {
+            Log.d(LOG_TAG, "There is no accelerometer.");
         }
 
-        return super.onOptionsItemSelected(item);
+        gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        if (gyroscope != null) {
+            sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+        } else {
+            Log.d(LOG_TAG, "There is no gyroscope.");
+        }
+
+        if (isExternalStorageWriteable) {
+            File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), DIR_NAME);
+            if (!dir.exists()) {
+                dir.mkdirs();
+                Log.d(LOG_TAG, "Directory created.");
+            } else {
+                Log.d(LOG_TAG, "Directory already exists.");
+            }
+            if (accelerometer != null) {
+                accelerometerFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/" + DIR_NAME, "accelerometer.txt");
+                if (!accelerometerFile.exists()) {
+                    try {
+                        accelerometerFile.createNewFile();
+                        Log.d(LOG_TAG, "Accelerometer data file created.");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Log.d(LOG_TAG, "Accelerometer data file already exists.");
+                }
+            }
+            if (gyroscope != null) {
+                gyroscopeFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/" + DIR_NAME, "gyroscope.txt");
+                if (!gyroscopeFile.exists()) {
+                    try {
+                        gyroscopeFile.createNewFile();
+                        Log.d(LOG_TAG, "Gyroscope data file created.");
+                    } catch (IOException e) {
+                        Log.e(LOG_TAG, "File creating failed: " + e.toString());
+                    }
+                } else {
+                    Log.d(LOG_TAG, "Gyroscope data file already exists.");
+                }
+            }
+        }
+    }
+
+    public void onButtonCollectDataClick(View v) {
+        collectingData = !collectingData;
+
+        if (collectingData) {
+            Log.d(LOG_TAG, "Starting collecting data.");
+        } else {
+            Log.d(LOG_TAG, "Stopping collecting data.");
+        }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (collectingData) {
+            if (event.sensor.equals(accelerometer)) {
+                try {
+                    FileWriter fileWriter = new FileWriter(accelerometerFile, true);
+                    fileWriter.append(event.values[0] + " " + event.values[1] + " " + event.values[2]);
+                    fileWriter.flush();
+                    fileWriter.close();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "File write failed: " + e.toString());
+                }
+            } else if (event.sensor.equals(gyroscope)) {
+                try {
+                    FileWriter fileWriter = new FileWriter(accelerometerFile, true);
+                    fileWriter.append(event.values[0] + " " + event.values[1] + " " + event.values[2]);
+                    fileWriter.flush();
+                    fileWriter.close();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "File write failed: " + e.toString());
+                }
+            }
+            Log.d(LOG_TAG, event.sensor.getName() + "   -   x: " + event.values[0] + " y: " + event.values[1] + " z: " + event.values[2]);
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        if (collectingData) {
+            Log.d(LOG_TAG, sensor.getName() + " changed accuracy to " + accuracy + ".");
+        }
     }
 }
