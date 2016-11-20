@@ -19,6 +19,7 @@ import java.io.FileWriter;
 public class CollectorActivity extends AppCompatActivity implements SensorEventListener {
     private String LOG_TAG = "SensorDataCollectorLog";
     private String DIR_NAME = "SensorDataCollector";
+    public int SAMPLING_RATE = 20000;
     private File accelerometerFile = null;
     private File gyroscopeFile = null;
     private boolean isExternalStorageWriteable = Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
@@ -37,14 +38,14 @@ public class CollectorActivity extends AppCompatActivity implements SensorEventL
 
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         if (accelerometer != null) {
-            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, accelerometer, SAMPLING_RATE);
         } else {
             Log.d(LOG_TAG, "There is no accelerometer.");
         }
 
         gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         if (gyroscope != null) {
-            sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, gyroscope, SAMPLING_RATE);
         } else {
             Log.d(LOG_TAG, "There is no gyroscope.");
         }
