@@ -24,9 +24,17 @@
         android:text="Clear Data"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/buttonCollectData"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="83dp"
         android:id="@+id/buttonClearData"
-        android:onClick="onButtonClearDataClick" />
+        android:onClick="onButtonClearDataClick"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="82dp" />
+
+    <Button
+        android:text="Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/buttonSendData" />
 </RelativeLayout>

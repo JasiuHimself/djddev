@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.FileWriter;
 
+
 public class CollectorActivity extends AppCompatActivity implements SensorEventListener {
     private String LOG_TAG = "SensorDataCollectorLog";
     private String DIR_NAME = "SensorDataCollector";
@@ -25,6 +26,7 @@ public class CollectorActivity extends AppCompatActivity implements SensorEventL
     private Sensor accelerometer = null;
     private Sensor gyroscope = null;
     private boolean collectingData = false;
+    private long firstTimestamp = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,16 +93,20 @@ public class CollectorActivity extends AppCompatActivity implements SensorEventL
             Log.d(LOG_TAG, "Starting collecting data.");
         } else {
             Log.d(LOG_TAG, "Stopping collecting data.");
+            firstTimestamp = 0;
         }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (collectingData) {
+            if (firstTimestamp == 0) {
+                firstTimestamp = Math.round((double)event.timestamp/1000000);   // convert timestamp to milliseconds
+            }
             if (event.sensor.equals(accelerometer)) {
                 try {
                     FileWriter fileWriter = new FileWriter(accelerometerFile, true);
-                    fileWriter.append(event.values[0] + " " + event.values[1] + " " + event.values[2]);
+                    fileWriter.append(event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + (Math.round((double)event.timestamp/1000000) - firstTimestamp) + System.getProperty("line.separator"));
                     fileWriter.flush();
                     fileWriter.close();
                 } catch (IOException e) {
@@ -109,14 +115,13 @@ public class CollectorActivity extends AppCompatActivity implements SensorEventL
             } else if (event.sensor.equals(gyroscope)) {
                 try {
                     FileWriter fileWriter = new FileWriter(accelerometerFile, true);
-                    fileWriter.append(event.values[0] + " " + event.values[1] + " " + event.values[2]);
+                    fileWriter.append(event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + (Math.round((double)event.timestamp/1000) - firstTimestamp) + System.getProperty("line.separator"));
                     fileWriter.flush();
                     fileWriter.close();
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "File write failed: " + e.toString());
                 }
             }
-            Log.d(LOG_TAG, event.sensor.getName() + "   -   x: " + event.values[0] + " y: " + event.values[1] + " z: " + event.values[2]);
         }
     }
 
