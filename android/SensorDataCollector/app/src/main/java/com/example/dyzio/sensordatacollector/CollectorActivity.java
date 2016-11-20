@@ -98,6 +98,21 @@ public class CollectorActivity extends AppCompatActivity implements SensorEventL
         }
     }
 
+    public void onButtonClearDataClick(View v) {
+        if (accelerometerFile != null && accelerometerFile.exists()) {
+            accelerometerFile.delete();
+            Log.d(LOG_TAG, "Accelerometer data file deleted.");
+        }
+        if (gyroscopeFile != null && gyroscopeFile.exists()) {
+            gyroscopeFile.delete();
+            Log.d(LOG_TAG, "Gyroscope data file deleted.");
+        }
+    }
+
+    public void onButtonSendDataClick(View v) {
+
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (collectingData) {
