@@ -1,3 +1,11 @@
+Aby działało
+https://pip.pypa.io/en/stable/installing/
+zainstaluj pipa!
+pip install numpy
+pip install scipy
+pip install matplotlib
+
+
 Co jest zrobione:
 
 -zostało ogarnięte, że jak jest range (0,N) to znaczy for i=0;i<=N-1;i++, generalnie wtf
