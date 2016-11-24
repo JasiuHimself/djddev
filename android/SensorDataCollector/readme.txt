@@ -1,7 +1,7 @@
-# Czêstotliwoœæ próbkowania: 50Hz
+# CzÄ™stotliwoÅ›Ä‡ prÃ³bkowania: 50Hz
 
-# Œcie¿ka do plików: 
-	pamiêæ wewnêtrzna/documents/SensorDataCollector/{accelerometer / gyroscope}.txt
+# ÅšcieÅ¼ka do plikÃ³w: 
+	pamiÄ™Ä‡ wewnÄ™trzna/documents/SensorDataCollector/{accelerometer / gyroscope}.txt
 
-# Format danych z akcelerometru: 
-	x y z timestamp[ms]
+# Format danych z czujnikÃ³w: 
+	timestamp[ms],x,y,z
