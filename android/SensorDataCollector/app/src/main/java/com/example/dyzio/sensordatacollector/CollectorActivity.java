@@ -1,11 +1,14 @@
 package com.example.dyzio.sensordatacollector;
 
+import android.Manifest;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,12 +20,15 @@ import java.io.FileWriter;
 
 
 public class CollectorActivity extends AppCompatActivity implements SensorEventListener {
-    private String LOG_TAG = "SensorDataCollectorLog";
-    private String DIR_NAME = "SensorDataCollector";
-    public int SAMPLING_RATE = 20000;
+    private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 112;
+    private static String LOG_TAG = "SensorDataCollectorLog";
+    private static String DIR_NAME = "SensorDataCollector";
+    public static int SAMPLING_RATE = 20000;        // time for sample in us
+    public static int TIMESTAMP_DIVIDER = 1000000;  // convert timestamp from ns to ms
+
     private File accelerometerFile = null;
     private File gyroscopeFile = null;
-    private boolean isExternalStorageWriteable = Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
+    private boolean isExternalStorageWritable = Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     private SensorManager sensorManager;
     private Sensor accelerometer = null;
     private Sensor gyroscope = null;
@@ -33,6 +39,10 @@ public class CollectorActivity extends AppCompatActivity implements SensorEventL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_collector);
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
@@ -50,8 +60,8 @@ public class CollectorActivity extends AppCompatActivity implements SensorEventL
             Log.d(LOG_TAG, "There is no gyroscope.");
         }
 
-        if (isExternalStorageWriteable) {
-            File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), DIR_NAME);
+        if (isExternalStorageWritable) {
+            File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), DIR_NAME);
             if (!dir.exists()) {
                 dir.mkdirs();
                 Log.d(LOG_TAG, "Directory created.");
@@ -59,7 +69,7 @@ public class CollectorActivity extends AppCompatActivity implements SensorEventL
                 Log.d(LOG_TAG, "Directory already exists.");
             }
             if (accelerometer != null) {
-                accelerometerFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/" + DIR_NAME, "accelerometer.txt");
+                accelerometerFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + DIR_NAME, "accelerometer.txt");
                 if (!accelerometerFile.exists()) {
                     try {
                         accelerometerFile.createNewFile();
@@ -72,7 +82,7 @@ public class CollectorActivity extends AppCompatActivity implements SensorEventL
                 }
             }
             if (gyroscope != null) {
-                gyroscopeFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/" + DIR_NAME, "gyroscope.txt");
+                gyroscopeFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + DIR_NAME, "gyroscope.txt");
                 if (!gyroscopeFile.exists()) {
                     try {
                         gyroscopeFile.createNewFile();
@@ -117,12 +127,12 @@ public class CollectorActivity extends AppCompatActivity implements SensorEventL
     public void onSensorChanged(SensorEvent event) {
         if (collectingData) {
             if (firstTimestamp == 0) {
-                firstTimestamp = Math.round((double)event.timestamp/1000000);   // convert timestamp to milliseconds
+                firstTimestamp = Math.round((double)event.timestamp/TIMESTAMP_DIVIDER);   // convert timestamp to milliseconds
             }
             if (event.sensor.equals(accelerometer)) {
                 try {
                     FileWriter fileWriter = new FileWriter(accelerometerFile, true);
-                    fileWriter.append(event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + (Math.round((double)event.timestamp/1000000) - firstTimestamp) + System.getProperty("line.separator"));
+                    fileWriter.append(Math.round((double)event.timestamp/TIMESTAMP_DIVIDER) - firstTimestamp + "," + event.values[0] + "," + event.values[1] + "," + event.values[2] + System.getProperty("line.separator"));
                     fileWriter.flush();
                     fileWriter.close();
                 } catch (IOException e) {
@@ -130,8 +140,8 @@ public class CollectorActivity extends AppCompatActivity implements SensorEventL
                 }
             } else if (event.sensor.equals(gyroscope)) {
                 try {
-                    FileWriter fileWriter = new FileWriter(accelerometerFile, true);
-                    fileWriter.append(event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + (Math.round((double)event.timestamp/1000) - firstTimestamp) + System.getProperty("line.separator"));
+                    FileWriter fileWriter = new FileWriter(gyroscopeFile, true);
+                    fileWriter.append(Math.round((double)event.timestamp/TIMESTAMP_DIVIDER) - firstTimestamp + "," + event.values[0] + "," + event.values[1] + "," + event.values[2] + System.getProperty("line.separator"));
                     fileWriter.flush();
                     fileWriter.close();
                 } catch (IOException e) {
