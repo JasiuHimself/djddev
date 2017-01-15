@@ -1,9 +1,9 @@
 Aby działało
 https://pip.pypa.io/en/stable/installing/
 zainstaluj pipa!
-pip install numpy
-pip install scipy
-pip install matplotlib
+sudo pip install numpy
+sudo pip install scipy
+sudo pip install matplotlib
 
 
 Co jest zrobione:
@@ -17,6 +17,16 @@ Co jest zrobione:
 
 
 do zrobienia
+
+co trzeba zainstalować, żeby zainstalować theano i kerasa?
+
+sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
+
+sudo pip install theano 
+sudo pip install keras
+i jest ok
+
+
 WALIDACJA USUWANIA DC COMPONENT!!!!!!!!!!!!!
 WYDAJE SIE ŻE COŚ NIE DO KOŃCA DZIAŁA, ALE PRZEKLEPAŁEM WZÓR
 
@@ -35,7 +45,5 @@ samochodem
 
 
 CELE
-    żeby działało jako tako
-    żeby działało dobrze
     żeby działało na sieciach neuronowych
     behavioral deep learning :D
