@@ -11,31 +11,68 @@
     tools:context="com.example.dyzio.sensordatacollector.CollectorActivity">
 
     <Button
-        android:text="Collect Data"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="72dp"
-        android:id="@+id/buttonCollectData"
-        android:onClick="onButtonCollectDataClick" />
-
-    <Button
         android:text="Clear Data"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/buttonClearData"
         android:onClick="onButtonClearDataClick"
+        android:layout_marginBottom="23dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="82dp" />
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:text="Send Data"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
         android:id="@+id/buttonSendData"
-        android:onClick="onButtonSendDataClick" />
+        android:onClick="onButtonSendDataClick"
+        android:layout_above="@+id/buttonClearData"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="39dp" />
+
+    <Button
+        android:text="Tram"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonCollectTram"
+        android:layout_alignBaseline="@+id/buttonCollectCar"
+        android:layout_alignBottom="@+id/buttonCollectCar"
+        android:layout_toEndOf="@+id/buttonSendData"
+        android:onClick="onButtonCollectTramClick" />
+
+    <Button
+        android:text="Train"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonCollectTrain"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/buttonCollectTram"
+        android:onClick="onButtonCollectTrainClick" />
+
+    <Button
+        android:text="Bus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonCollectBus"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/buttonCollectCar"
+        android:onClick="onButtonCollectBusClick" />
+
+    <Button
+        android:text="Car"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonCollectCar"
+        android:layout_marginTop="19dp"
+        android:layout_below="@+id/buttonCollectBus"
+        android:layout_toStartOf="@+id/buttonSendData"
+        android:onClick="onButtonCollectCarClick" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonCollectTram"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="64dp"
+        android:id="@+id/textViewMessage" />
 </RelativeLayout>
