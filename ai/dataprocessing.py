@@ -12,116 +12,188 @@ import matplotlib.animation as animation
 
 import math
 
+class Dataset:
+    def __init__(self, dataFileName, windowWidth, overlappingPercent):
+        self.dataFileName = dataFileName
+        self.windowWidth = windowWidth
+        self.overlapping = self.overlappingCount(windowWidth,overlappingPercent )
+        self.readDataFile(self.dataFileName)
+        self.accNormDC = self.normWithoutDC(self.norm(self.accX,self.accY,self.accZ))
+        self.gyrNormDC = self.normWithoutDC(self.norm(self.gyrR,self.gyrP,self.gyrY))
+        self.currentPositionInSignal = 0
+        self.classesPositionsAndWindowsCounts = []
+        # self.calculateClassesPositionsAndWindowsConunts()
+        self.returnWindowsCountAndNewClassBeginning(0)
 
-def column(matrix, i):
-    return [row[i] for row in matrix]
 
-def norm(vector1, vector2, vector3):
-    norm = []
-    for i in range(len(vector1)):
-         norm.append(math.sqrt(pow(vector1[i],2)+pow(vector2[i],2)+pow(vector3[i],2)))
-    return norm
+    def readDataFile(self,dataFileName):
+        csv_in = open(dataFileName, 'rb')
+        myreader = csv.reader(csv_in)
 
-def normWithoutDC(norm):
-    normWithoutDC = []
-    for n in range(0, len(norm)):
+        class_vector = []
+        accX = []
+        accY = []
+        accZ = []
+        gyrR = []
+        gyrP = []
+        gyrY = []
+        self.class_vector, accX, accY, accZ, gyrR, gyrP, gyrY = zip(*myreader)
+        self.accX = map(float, accX)
+        self.accY = map(float, accY)
+        self.accZ = map(float, accZ)
+        self.gyrR = map(float, gyrR)
+        self.gyrP = map(float, gyrP)
+        self.gyrY = map(float, gyrY)
+
+
+    def norm(self,vector1, vector2, vector3):
+        norm = []
+        for i in range(len(vector1)):
+             norm.append(math.sqrt(pow(vector1[i],2)+pow(vector2[i],2)+pow(vector3[i],2)))
+        return norm
+
+    def normWithoutDC(self,norm):
+        normWithoutDC = []
+        for n in range(0, len(norm)):
+            sumator = 0
+            for l in range(0,len(norm)):
+                sumator += norm[n-l]
+            normWithoutDC.append(norm[n]-((1.0/len(norm))*sumator))
+        return normWithoutDC
+
+    #aka srednia arytmetyczna
+    def signalEnergy(signal):
         sumator = 0
-        for l in range(0,len(norm)):
-            sumator += norm[n-l]
-        normWithoutDC.append(norm[n]-((1.0/len(norm))*sumator))
-    return normWithoutDC
+        for n in range(0,len(signal)):
+            sumator += signal[n]
+        return (1.0/len(signal))*sumator
 
-#aka srednia arytmetyczna
-def signalEnergy(signal):
-    sumator = 0
-    for n in range(0,len(signal)):
-        sumator += signal[n]
-    return (1.0/len(signal))*sumator
+    def signalVariance(signal):
+        sumator = 0
+        meanValue = signalEnergy(signal) #signal mean value
+        for n in range(0, len(signal)):
+            sumator += pow((signal[n] - meanValue),2)
+        return (1.0/len(signal))*sumator
 
-def signalVariance(signal):
-    sumator = 0
-    meanValue = signalEnergy(signal) #signal mean value
-    for n in range(0, len(signal)):
-        sumator += pow((signal[n] - meanValue),2)
-    return (1.0/len(signal))*sumator
+    def fft(signal):
+        return np.fft.fft(signal)
 
-def fft(signal):
-    return np.fft.fft(signal)
+    def window(self,signal, currentPositionInSignal = 0):
+        windowBeginning = currentPositionInSignal #* windowWidth - currentPositionInSignal * overlapping
+        if (windowBeginning + self.windowWidth <= len(signal)):
+            window = signal[windowBeginning:windowBeginning+self.windowWidth]
+            return window
+        else:
+            return False
 
-def window(signal,windowWidth, overlappingPercent = 0, currentPositionInSignal = 0):
-    overlapping = 0
-    if (overlappingPercent):
-        overlapping = (int)(overlappingPercent/100.0*windowWidth)
-    windowBegining = currentPositionInSignal * windowWidth - currentPositionInSignal * overlapping
-    if (windowBegining + windowWidth <= len(signal)):
-        window = signal[windowBegining:windowBegining+windowWidth]
-        return window #, currentPositionInSignal+1
-    else:
-        return False
+    def iterateThroughWindows(self, currentClass):
+        classBeginning, windowsCount = self.classesPositionsAndWindowsCounts[currentClass]
+        print "classBeginning: "+str(classBeginning)+ " windowsCount: " + str(windowsCount)
+        for currentWindow in range(windowsCount):
+            print self.window(self.class_vector, classBeginning+currentWindow*self.windowWidth - self.overlapping * currentWindow)
 
-def createTimeVectorToPlotWindow(windowWidth, overlappingPercent, currentPositionInSignal =0):
-    overlapping = 0
-    if (overlappingPercent):
-        overlapping = (int)(overlappingPercent/100.0*windowWidth)
-    windowBegining = currentPositionInSignal * windowWidth - currentPositionInSignal * overlapping
-    return range(windowBegining,windowBegining+windowWidth)
 
-def signalRangeInWindowsCount(signal, windowWidth, overlappingPercent):
-    overlapping = 0
-    windowsCount = 0
-    windowBegining = 0
-    if (overlappingPercent):
-        overlapping = (int)(overlappingPercent/100.0*windowWidth)
-    while(windowBegining + windowWidth <= len(signal)):
-        windowsCount += 1
-        windowBegining += windowWidth - overlapping
-    return windowsCount
+    def overlappingCount(self,windowWidth, overlappingPercent = 0 ):
+        overlapping = 0
+        if (overlappingPercent):
+            overlapping = (int)(overlappingPercent/100.0*windowWidth)
+        return overlapping
 
-def readDataFile(dataFileName):
-    csv_in = open(dataFileName, 'rb')
-    myreader = csv.reader(csv_in)
+    def createTimeVectorToPlotWindow(windowWidth, overlappingPercent, currentPositionInSignal =0):
+        overlapping = overlappingCount(windowWidth, overlappingPercent)
+        windowBeginning = currentPositionInSignal * windowWidth - currentPositionInSignal * overlapping
+        return range(windowBeginning,windowBeginning+windowWidth)
 
-    sample_Class_vector = []
-    accX_vector = []
-    accY_vector = []
-    accZ_vector = []
-    gyrR_vector = []
-    gyrP_vector = []
-    gyrY_vector = []
+    def signalRangeInWindowsCount(signal, windowWidth, overlappingPercent):
+        overlapping = overlappingCount(windowWidth, overlappingPercent)
+        windowsCount = 0
+        windowBeginning = 0
+        while(windowBeginning + windowWidth <= len(signal)):
+            windowsCount += 1
+            windowBeginning += windowWidth - overlapping
+        return windowsCount
 
-    for row in myreader:
-        sample_Class, accX, accY, accZ, gyrR, gyrP, gyrY = row
-        sample_Class_vector, accX_vector, accY_vector, accZ_vector, gyrR_vector, gyrP_vector, gyrY_vector = zip(*myreader)
-        accX_vector = map(float, accX_vector)
-        accY_vector = map(float, accY_vector)
-        accZ_vector = map(float, accZ_vector)
-        gyrR_vector = map(float, gyrR_vector)
-        gyrP_vector = map(float, gyrP_vector)
-        gyrY_vector = map(float, gyrY_vector)
 
-    return sample_Class_vector, accX_vector, accY_vector, accZ_vector, gyrR_vector, gyrP_vector, gyrY_vector
+#
+#
+# Zapisuję postęp
+#     def returnWindowsCountAndNewClassBeginning(self, windowBeginning = 0):
+#         nextClassBeginning = 0
+#         windowCount = 0    # NIE TYKAĆ TEGO WARUNKU - JEST DOBRY (WHILE PONIŻEJ)
+#         while (windowBeginning + self.windowWidth-1 <= len(self.class_vector)-1):#przesuniecie indeksu do zera
+#             consistent = True
+#             # sprawdz czy zawartosc kolejnego okna nalezy do jednej klasy
+#             for i in range (windowBeginning+1, windowBeginning+self.windowWidth): #bo nie porownujemy tego samego elementu
+#                 if (self.class_vector[i] != self.class_vector[windowBeginning]):
+#                     consistent = False
+#                     print "inc " + str(windowBeginning) + " : " + self.class_vector[windowBeginning]   + " "+ str(i) + " : "  + self.class_vector[i]
+#                 else:
+#                     print "con " + str(windowBeginning) + " : " + self.class_vector[windowBeginning] +" " + str(i) + " : "  + self.class_vector[i]
+#             windowBeginning +=  self.windowWidth - self.overlapping
+#
 
 
 
-#otworz plik i zapisz wartosc do wektora
-sample_Class,accX,accY,accZ,gyrR,gyrP,gyrY = readDataFile('accgyrclass.csv');
-
-windowWidth = 2
-overlappingPercent = 0
 
 
 
-accNormDC = normWithoutDC(norm(accX,accY,accZ))
-gyrNormDC = normWithoutDC(norm(gyrR,gyrP,gyrY))
+
+    def returnWindowsCountAndNewClassBeginning(self, windowBeginning = 0):
+        windowsCount = 0    # NIE TYKAĆ TEGO WARUNKU - JEST DOBRY (WHILE PONIŻEJ)
+        while (windowBeginning + self.windowWidth-1 <= len(self.class_vector)-1):#przesuniecie indeksu do zera
+            consistent = True
+            # sprawdz czy zawartosc kolejnego okna nalezy do jednej klasy
+            for i in range (windowBeginning+1, windowBeginning+self.windowWidth): #bo nie porownujemy tego samego elementu
+                if (self.class_vector[i] != self.class_vector[windowBeginning]):
+                    consistent = False
+
+            if (consistent):
+                windowBeginning +=  self.windowWidth - self.overlapping
+                windowsCount+=1
+            else:
+                newClassBeginning = windowBeginning+1
+                while(self.class_vector[windowBeginning]==self.class_vector[newClassBeginning]):
+                    print newClassBeginning
+                    newClassBeginning+=1
+                break
+        # print "pierwszy element nowe klasy: " + str(newClassBeginning) + 'to' + self.class_vector[newClassBeginning] + "ilosc okien:" + str(windowCount)
+        return windowCounts, newClassBeginning
 
 
 
-plt.figure()
-plt.subplot(2,1,1)
-plt.hold(True)
-plt.grid(True)
 
-plt.plot(accNormDC)
+
+    def calculateClassesPositionsAndWindowsConunts(self):
+        thereIsNextClass = True
+        windowBeginning = 0
+        newClassBeginning = 0
+        oldClassBeginnig = 0
+        while(thereIsNextClass):
+            windowsCount,newClassBeginning = self.returnWindowsCountAndNewClassBeginning(oldClassBeginnig)
+            self.classesPositionsAndWindowsCounts.append((oldClassBeginnig,windowsCount))
+            oldClassBeginnig = newClassBeginning
+            if not(newClassBeginning):
+                thereIsNextClass = False
+        print self.classesPositionsAndWindowsCounts
+
+        # iterowanie przez wszystkie klasy
+        for classIterator in range (len(self.classesPositionsAndWindowsCounts)):
+            self.iterateThroughWindows(classIterator)
+
+
+
+# nazwa pliku, szerokosc okna(CO NAJMNIEJ 2), overlapping
+dataset = Dataset('accgyrclass.csv',4,50)
+
+
+#
+#
+# plt.figure()
+# plt.subplot(2,1,1)
+# plt.hold(True)
+# plt.grid(True)
+#
+# plt.plot(accNormDC)
 
 
 # Zaznacznie dzialania okienek
@@ -150,11 +222,10 @@ plt.plot(accNormDC)
 
 # GYROSCOPE
 
-plt.subplot(2,1,2)
-plt.hold(True)
+# plt.subplot(2,1,2)
+# plt.hold(True)
+# plt.plot(gyrNormDC)
 
-plt.plot(gyrNormDC)
 
-# plotowanie wariancji
 
-plt.show()
+# plt.show()
