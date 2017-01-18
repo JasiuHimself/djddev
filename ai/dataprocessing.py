@@ -22,8 +22,10 @@ class Dataset:
         self.gyrNormDC = self.normWithoutDC(self.norm(self.gyrR,self.gyrP,self.gyrY))
         self.currentPositionInSignal = 0
         self.classesPositionsAndWindowsCounts = []
-        # self.calculateClassesPositionsAndWindowsConunts()
-        self.returnWindowsCountAndNewClassBeginning(0)
+        self.calculateClassesPositionsAndWindowsConunts()
+        # self.accData = []
+        # self.gyrData = []
+        # self.generateDataset()
 
 
     def readDataFile(self,dataFileName):
@@ -62,11 +64,11 @@ class Dataset:
         return normWithoutDC
 
     #aka srednia arytmetyczna
-    def signalEnergy(signal):
+    def signalEnergy(signal, windowBeginning):
         sumator = 0
-        for n in range(0,len(signal)):
+        for n in range(0,windowBeginning+self.windowWidth):
             sumator += signal[n]
-        return (1.0/len(signal))*sumator
+        return (1.0/len(windowBeginning+self.windowWidth))*sumator
 
     def signalVariance(signal):
         sumator = 0
@@ -114,52 +116,35 @@ class Dataset:
         return windowsCount
 
 
-#
-#
-# Zapisuję postęp
-#     def returnWindowsCountAndNewClassBeginning(self, windowBeginning = 0):
-#         nextClassBeginning = 0
-#         windowCount = 0    # NIE TYKAĆ TEGO WARUNKU - JEST DOBRY (WHILE PONIŻEJ)
-#         while (windowBeginning + self.windowWidth-1 <= len(self.class_vector)-1):#przesuniecie indeksu do zera
-#             consistent = True
-#             # sprawdz czy zawartosc kolejnego okna nalezy do jednej klasy
-#             for i in range (windowBeginning+1, windowBeginning+self.windowWidth): #bo nie porownujemy tego samego elementu
-#                 if (self.class_vector[i] != self.class_vector[windowBeginning]):
-#                     consistent = False
-#                     print "inc " + str(windowBeginning) + " : " + self.class_vector[windowBeginning]   + " "+ str(i) + " : "  + self.class_vector[i]
-#                 else:
-#                     print "con " + str(windowBeginning) + " : " + self.class_vector[windowBeginning] +" " + str(i) + " : "  + self.class_vector[i]
-#             windowBeginning +=  self.windowWidth - self.overlapping
-#
-
-
-
-
-
-
 
     def returnWindowsCountAndNewClassBeginning(self, windowBeginning = 0):
         windowsCount = 0    # NIE TYKAĆ TEGO WARUNKU - JEST DOBRY (WHILE PONIŻEJ)
+        newClassBeginning =0
         while (windowBeginning + self.windowWidth-1 <= len(self.class_vector)-1):#przesuniecie indeksu do zera
             consistent = True
-            # sprawdz czy zawartosc kolejnego okna nalezy do jednej klasy
+            # sprawdz czy zawartosc okna nalezy do jednej klasy
             for i in range (windowBeginning+1, windowBeginning+self.windowWidth): #bo nie porownujemy tego samego elementu
                 if (self.class_vector[i] != self.class_vector[windowBeginning]):
                     consistent = False
-
             if (consistent):
                 windowBeginning +=  self.windowWidth - self.overlapping
                 windowsCount+=1
+
+                # jeżeli początek nasępnego okna nie jest poza wektorem klas
+                if (windowBeginning<=len(self.class_vector)-1):
+                    #jezeli pierwszy element nastepnego okna ma inna klase niz ktorakolwiek probka poprzedniego (consistent)
+                    if (self.class_vector[windowBeginning] != self.class_vector[windowBeginning-1] ):
+                        newClassBeginning = windowBeginning
+                        break
             else:
                 newClassBeginning = windowBeginning+1
                 while(self.class_vector[windowBeginning]==self.class_vector[newClassBeginning]):
-                    print newClassBeginning
+                    # print newClassBeginning
                     newClassBeginning+=1
                 break
+
         # print "pierwszy element nowe klasy: " + str(newClassBeginning) + 'to' + self.class_vector[newClassBeginning] + "ilosc okien:" + str(windowCount)
-        return windowCounts, newClassBeginning
-
-
+        return windowsCount, newClassBeginning
 
 
 
@@ -177,13 +162,36 @@ class Dataset:
         print self.classesPositionsAndWindowsCounts
 
         # iterowanie przez wszystkie klasy
+
         for classIterator in range (len(self.classesPositionsAndWindowsCounts)):
-            self.iterateThroughWindows(classIterator)
+             self.iterateThroughWindows(classIterator)
+
+
+
+# classBeginning, windowsCount
+    def generateDataset(self):
+        print self.classesPositionsAndWindowsCounts
+        #dla każdej zbalezionej sekwencji okien
+        for i in range (len(self.classesPositionsAndWindowsCounts)):
+            print self.classesPositionsAndWindowsCounts[i]
+            # dla każdego okna z danej sekwencji
+            windowBeginning  = self.classesPositionsAndWindowsCounts[i][0]
+            for j in range(self.classesPositionsAndWindowsCounts[i][1]):
+
+                print "początek okna: " + str( windowBeginning )
+
+
+
+
+                windowBeginning += self.windowWidth - self.overlapping
+
+
+
 
 
 
 # nazwa pliku, szerokosc okna(CO NAJMNIEJ 2), overlapping
-dataset = Dataset('accgyrclass.csv',4,50)
+dataset = Dataset('accgyrclass.csv',2,0)
 
 
 #
