@@ -4,7 +4,6 @@
 import string
 import numpy as np
 import csv
-from math import pi
 from scipy.signal import butter, lfilter
 from scipy.fftpack import fft
 import matplotlib.pyplot as plt
@@ -72,9 +71,6 @@ class Dataset:
             sumator += signal[n]
         return (1.0/len(signal))*sumator
 
-    def standardDeviation(self,signal):
-        return math.sqrt(self.signalVariance(signal))
-
     def signalVariance(self,signal):
         sumator = 0
         meanValue = self.signalEnergy(signal) #signal mean value
@@ -82,23 +78,8 @@ class Dataset:
             sumator += pow((signal[n] - meanValue),2)
         return (1.0/len(signal))*sumator
 
-    def fft(self,signal):
+    def fft(signal):
         return np.fft.fft(signal)
-
-    def signalSkewness(self,signal):
-        sumator = 0
-        mean = self.signalEnergy(signal)# meanValue
-        for i in range(len(signal)):
-            sumator += pow(signal[i] - mean,3)
-        return sumator/(len(signal)*pow(self.standardDeviation(signal),3))
-
-    def signalKurtosis(self, signal):
-        sumator = 0
-        mean = self.signalEnergy(signal)# meanValue
-        for i in range(len(signal)):
-            sumator += pow(signal[i] - mean,4)
-        return sumator/(len(signal)*pow(self.standardDeviation(signal),4))
-
 
     def window(self,signal, currentPositionInSignal = 0):
         windowBeginning = currentPositionInSignal #* windowWidth - currentPositionInSignal * overlapping
@@ -198,51 +179,36 @@ class Dataset:
             windowBeginning  = self.classesPositionsAndWindowsCounts[i][0]
             for j in range(self.classesPositionsAndWindowsCounts[i][1]):
                 # tak powinno być
-                #currentAccWindow = self.normWithoutDC(self.window(self.accNorm, windowBeginning))
                 currentAccWindow = self.window(self.accNorm, windowBeginning)
-
                 currentAccEnergy = self.signalEnergy(currentAccWindow)
                 currentAccVariance = self.signalVariance(currentAccWindow)
-                currentAccSkewness = self.signalSkewness(currentAccWindow)
-                #
-                print "okno            " + str(currentAccWindow) + "/okno"
-                # print "sredna okna     " + str(currentAccEnergy)
-                # print "wariancja okna" + str(currentAccVariance)
-                # print str(fft(currentAccWindow))
-                print "skewness  " + str(currentAccSkewness)
 
+                #currentAccWindow = self.normWithoutDC(self.window(self.accNorm, windowBeginning))
+                print "okno            " + str(currentAccWindow) + "/okno"
+                print "sredna okna     " + str(currentAccEnergy)
+                print "wariancja okna" + str(currentAccVariance)
+
+# WROT FUNKCJI WINDOW W FICZERSY
+
+                #dla każdego okienka
+                #strip DC
+                #i na stripowanym DC rób opercje dające feature'y
                 #następnie zapisz do wektora
                 #po zakończeniu zapisz do pliku
 
-                # windowBeginning += self.windowWidth - self.overlapping
-                # print "......................................................................."
 
-        Fs=200.
-        F=50.
-        t = [i*1./Fs for i in range(200)]
-        y = np.sin(2*pi*np.array(t)*F)
+                print self.class_vector[windowBeginning] +" windBeg: " + str( windowBeginning ) + \
+                    str(self.accNorm[windowBeginning:windowBeginning+self.windowWidth]) + \
+                    str(self.signalEnergy(self.accNorm))
 
-        fourier = np.fft.fft(y)
-        frequencies = np.fft.fftfreq(len(t), 0.005)  # where 0.005 is the inter-sample time difference
-        positive_frequencies = frequencies[np.where(frequencies >= 0)]
-        magnitudes = abs(fourier[np.where(frequencies >= 0)])  # magnitude spectrum
+                windowBeginning += self.windowWidth - self.overlapping
+                print "......................................................................."
 
-        peak_frequency = np.argmax(magnitudes)
-        print peak_frequency
-
-
-
-
-
-        mu, sigma = 0, 0.1 # mean and standard deviation
-        s = np.random.normal(mu, sigma, 10000000)
-        print self.signalSkewness(s)
 
 
 
 # nazwa pliku, szerokosc okna(CO NAJMNIEJ 2), overlapping
-dataset = Dataset('accgyrclass.csv',10,0)
-
+dataset = Dataset('accgyrclass.csv',3,0)
 
 
 #
