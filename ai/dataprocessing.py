@@ -72,7 +72,7 @@ class Dataset:
             sumator += signal[n]
         return (1.0/len(signal))*sumator
 
-    def standardDeviation(self,signal):
+    def signalStandardDeviation(self,signal):
         return math.sqrt(self.signalVariance(signal))
 
     def signalVariance(self,signal):
@@ -87,17 +87,25 @@ class Dataset:
 
     def signalSkewness(self,signal):
         sumator = 0
+        standardDeviation = self.signalStandardDeviation(signal)
         mean = self.signalEnergy(signal)# meanValue
         for i in range(len(signal)):
             sumator += pow(signal[i] - mean,3)
-        return sumator/(len(signal)*pow(self.standardDeviation(signal),3))
+        if (standardDeviation == 0):
+            return 0
+        else:
+            return sumator/(len(signal)*pow(standardDeviation,3))
 
     def signalKurtosis(self, signal):
         sumator = 0
+        standardDeviation = self.signalStandardDeviation(signal)
         mean = self.signalEnergy(signal)# meanValue
         for i in range(len(signal)):
             sumator += pow(signal[i] - mean,4)
-        return sumator/(len(signal)*pow(self.standardDeviation(signal),4))
+        if (standardDeviation == 0):
+            return 0
+        else:
+            return sumator/(len(signal)*pow(standardDeviation,4))
 
 
     def window(self,signal, currentPositionInSignal = 0):
@@ -190,58 +198,86 @@ class Dataset:
 
 # classBeginning, windowsCount
     def generateDataset(self):
-        print self.classesPositionsAndWindowsCounts
+        # print self.classesPositionsAndWindowsCounts
         #dla każdej zbalezionej sekwencji okien
+        csv_out = open('generatedDataset.csv', 'wb')
+        fileWriter = csv.writer(csv_out, delimiter = ',')
         for i in range (len(self.classesPositionsAndWindowsCounts)):
-            print self.classesPositionsAndWindowsCounts[i]
+            # print self.classesPositionsAndWindowsCounts[i]
             # dla każdego okna z danej sekwencji
             windowBeginning  = self.classesPositionsAndWindowsCounts[i][0]
             for j in range(self.classesPositionsAndWindowsCounts[i][1]):
-                # tak powinno być
-                #currentAccWindow = self.normWithoutDC(self.window(self.accNorm, windowBeginning))
-                currentAccWindow = self.window(self.accNorm, windowBeginning)
+                # TWORZENIE WEKTORÓW GYR I ACC
+                currentAccWindow = self.normWithoutDC(self.window(self.accNorm, windowBeginning))
+                currentGyrWindow = self.normWithoutDC(self.window(self.gyrNorm, windowBeginning))
+                # ACC
+                currentAccWindowEnergy = self.signalEnergy(currentAccWindow)
+                currentAccWindowStandardDeviation = self.signalStandardDeviation(currentAccWindow)
+                currentAccWindowVariance = self.signalVariance(currentAccWindow)
+                currentAccWindowSkewness = self.signalSkewness(currentAccWindow)
+                currentAccWindowKurtosis  = self.signalKurtosis(currentAccWindow)
+                # GYR
+                currentGyrWindowEnergy = self.signalEnergy(currentGyrWindow)
+                currentGyrWindowStandardDeviation = self.signalStandardDeviation(currentGyrWindow)
+                currentGyrWindowVariance = self.signalVariance(currentGyrWindow)
+                currentGyrWindowSkewness = self.signalSkewness(currentGyrWindow)
+                currentGyrWindowKurtosis  = self.signalKurtosis(currentGyrWindow)
 
-                currentAccEnergy = self.signalEnergy(currentAccWindow)
-                currentAccVariance = self.signalVariance(currentAccWindow)
-                currentAccSkewness = self.signalSkewness(currentAccWindow)
-                #
-                print "okno            " + str(currentAccWindow) + "/okno"
-                # print "sredna okna     " + str(currentAccEnergy)
-                # print "wariancja okna" + str(currentAccVariance)
-                # print str(fft(currentAccWindow))
-                print "skewness  " + str(currentAccSkewness)
+                # print "okno            " + str(currentAccWindow) + "/okno"
 
-                #następnie zapisz do wektora
-                #po zakończeniu zapisz do pliku
+                currentRow = []
+                currentRow.append(self.class_vector[windowBeginning])
+                # ACC
+                currentRow.append(currentAccWindowEnergy)
+                currentRow.append(currentAccWindowStandardDeviation)
+                currentRow.append(currentAccWindowVariance)
+                currentRow.append(currentAccWindowSkewness)
+                currentRow.append(currentAccWindowKurtosis)
+                # currentRow.append(currentAccWindow     CZESTOTLIWOSCI           )
 
-                # windowBeginning += self.windowWidth - self.overlapping
+
+                # GYR
+                currentRow.append(currentGyrWindowEnergy)
+                currentRow.append(currentGyrWindowStandardDeviation)
+                currentRow.append(currentGyrWindowVariance)
+                currentRow.append(currentGyrWindowSkewness)
+                currentRow.append(currentGyrWindowKurtosis)
+
+                fileWriter.writerow(currentRow)
+
+                windowBeginning += self.windowWidth - self.overlapping
                 # print "......................................................................."
 
-        Fs=200.
-        F=50.
-        t = [i*1./Fs for i in range(200)]
-        y = np.sin(2*pi*np.array(t)*F)
 
-        fourier = np.fft.fft(y)
-        frequencies = np.fft.fftfreq(len(t), 0.005)  # where 0.005 is the inter-sample time difference
-        positive_frequencies = frequencies[np.where(frequencies >= 0)]
-        magnitudes = abs(fourier[np.where(frequencies >= 0)])  # magnitude spectrum
+        #
+        # Fs=200. # number of samples
+        # F=10. # frequency
+        # dt = 0.005# where 0.005 is the inter-sample time difference
+        # t = [i*1./Fs for i in range(200)]
+        # y = np.sin(2*pi*np.array(t)*F)+np.sin(4*pi*np.array(t)*F)
+        #
+                # fourier = np.fft.fft(y)
+        # frequencies = np.fft.fftfreq(len(t), dt)
+        # positive_frequencies = frequencies[np.where(frequencies >= 0)]
+        # magnitudes = abs(fourier[np.where(frequencies >= 0)])  # magnitude spectrum
+        #
+        # peak_frequency = np.argmax(magnitudes)
+        # print peak_frequency
+        #
+        # for o in range(len(frequencies)):
+        #     print str(frequencies[o]) + " " + str(magnitudes[np.where(frequencies[o])])
+        #
 
-        peak_frequency = np.argmax(magnitudes)
-        print peak_frequency
 
-
-
-
-
-        mu, sigma = 0, 0.1 # mean and standard deviation
-        s = np.random.normal(mu, sigma, 10000000)
-        print self.signalSkewness(s)
+        # print magnitudes
+        # plt.plot(magnitudes)
+        # plt.show()
 
 
 
 # nazwa pliku, szerokosc okna(CO NAJMNIEJ 2), overlapping
-dataset = Dataset('accgyrclass.csv',10,0)
+# dataset = Dataset('accgyrclass.csv',3,0)
+dataset = Dataset('data/BUS1.csv',250,0)
 
 
 

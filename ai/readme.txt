@@ -16,6 +16,7 @@ Co jest zrobione:
 
 
 do zrobienia
+poprawić zapisywnaie sekwencji okuen na indexy okien w wektorze dla spójności
 
 co trzeba zainstalować, żeby zainstalować theano i kerasa?
 

@@ -208,7 +208,7 @@ class Dataset:
 
 
 # nazwa pliku, szerokosc okna(CO NAJMNIEJ 2), overlapping
-dataset = Dataset('accgyrclass.csv',3,0)
+dataset = Dataset('accgyrclass.csv',2,0)
 
 
 #
