@@ -107,6 +107,21 @@ class Dataset:
         else:
             return sumator/(len(signal)*pow(standardDeviation,4))
 
+    def signalFrequencies(self,signal):
+        dt = 0.02# inter-sample time difference which is 20ms
+        fourier = np.fft.fft(signal)
+        frequencies = np.fft.fftfreq(len(signal), dt)
+        positive_frequencies = frequencies[np.where(frequencies >= 0)]
+        magnitudes = abs(fourier[np.where(frequencies >= 0)])  # magnitude spectrum
+
+        frequenciesVector = []
+        for i in range(3):
+            peak_frequency = np.argmax(magnitudes)
+            magnitudes[np.argmax(magnitudes)]=0
+            frequenciesVector.append(peak_frequency)
+        return frequenciesVector
+
+
 
     def window(self,signal, currentPositionInSignal = 0):
         windowBeginning = currentPositionInSignal #* windowWidth - currentPositionInSignal * overlapping
@@ -200,7 +215,9 @@ class Dataset:
     def generateDataset(self):
         # print self.classesPositionsAndWindowsCounts
         #dla każdej zbalezionej sekwencji okien
-        csv_out = open('generatedDataset.csv', 'wb')
+        # csv_out = open('generatedDataset.csv', 'wb')
+        csv_out = open('generatedDataset.csv', 'a')
+
         fileWriter = csv.writer(csv_out, delimiter = ',')
         for i in range (len(self.classesPositionsAndWindowsCounts)):
             # print self.classesPositionsAndWindowsCounts[i]
@@ -209,21 +226,27 @@ class Dataset:
             for j in range(self.classesPositionsAndWindowsCounts[i][1]):
                 # TWORZENIE WEKTORÓW GYR I ACC
                 currentAccWindow = self.normWithoutDC(self.window(self.accNorm, windowBeginning))
+                # currentAccWindow = self.window(self.accNorm, windowBeginning)
                 currentGyrWindow = self.normWithoutDC(self.window(self.gyrNorm, windowBeginning))
                 # ACC
-                currentAccWindowEnergy = self.signalEnergy(currentAccWindow)
+                currentAccWindowEnergy = abs(self.signalEnergy(currentAccWindow))*100000000000000
                 currentAccWindowStandardDeviation = self.signalStandardDeviation(currentAccWindow)
                 currentAccWindowVariance = self.signalVariance(currentAccWindow)
                 currentAccWindowSkewness = self.signalSkewness(currentAccWindow)
                 currentAccWindowKurtosis  = self.signalKurtosis(currentAccWindow)
+                currentAccWindowFrequencies = self.signalFrequencies(currentAccWindow)
                 # GYR
-                currentGyrWindowEnergy = self.signalEnergy(currentGyrWindow)
+                currentGyrWindowEnergy = abs(self.signalEnergy(currentGyrWindow))*100000000000000
                 currentGyrWindowStandardDeviation = self.signalStandardDeviation(currentGyrWindow)
                 currentGyrWindowVariance = self.signalVariance(currentGyrWindow)
                 currentGyrWindowSkewness = self.signalSkewness(currentGyrWindow)
                 currentGyrWindowKurtosis  = self.signalKurtosis(currentGyrWindow)
+                currentGyrWindowFrequencies = self.signalFrequencies(currentGyrWindow)
+
+
 
                 # print "okno            " + str(currentAccWindow) + "/okno"
+                # print "energy " + str(currentAccWindowEnergy)+" "+  str(currentAccWindowFrequencies)
 
                 currentRow = []
                 currentRow.append(self.class_vector[windowBeginning])
@@ -233,8 +256,8 @@ class Dataset:
                 currentRow.append(currentAccWindowVariance)
                 currentRow.append(currentAccWindowSkewness)
                 currentRow.append(currentAccWindowKurtosis)
-                # currentRow.append(currentAccWindow     CZESTOTLIWOSCI           )
-
+                for u in range(len(currentAccWindowFrequencies)):
+                    currentRow.append(currentAccWindowFrequencies[u])
 
                 # GYR
                 currentRow.append(currentGyrWindowEnergy)
@@ -242,42 +265,36 @@ class Dataset:
                 currentRow.append(currentGyrWindowVariance)
                 currentRow.append(currentGyrWindowSkewness)
                 currentRow.append(currentGyrWindowKurtosis)
+                for u in range(len(currentGyrWindowFrequencies)):
+                    currentRow.append(currentGyrWindowFrequencies[u])
 
                 fileWriter.writerow(currentRow)
-
                 windowBeginning += self.windowWidth - self.overlapping
                 # print "......................................................................."
 
 
-        #
-        # Fs=200. # number of samples
-        # F=10. # frequency
-        # dt = 0.005# where 0.005 is the inter-sample time difference
-        # t = [i*1./Fs for i in range(200)]
-        # y = np.sin(2*pi*np.array(t)*F)+np.sin(4*pi*np.array(t)*F)
-        #
-                # fourier = np.fft.fft(y)
-        # frequencies = np.fft.fftfreq(len(t), dt)
-        # positive_frequencies = frequencies[np.where(frequencies >= 0)]
-        # magnitudes = abs(fourier[np.where(frequencies >= 0)])  # magnitude spectrum
-        #
-        # peak_frequency = np.argmax(magnitudes)
-        # print peak_frequency
-        #
-        # for o in range(len(frequencies)):
-        #     print str(frequencies[o]) + " " + str(magnitudes[np.where(frequencies[o])])
-        #
-
-
-        # print magnitudes
-        # plt.plot(magnitudes)
-        # plt.show()
 
 
 
 # nazwa pliku, szerokosc okna(CO NAJMNIEJ 2), overlapping
-# dataset = Dataset('accgyrclass.csv',3,0)
-dataset = Dataset('data/BUS1.csv',250,0)
+# dataset = Dataset('nicimachanie.csv',250,0)
+windowWidth = 250
+overlapping = 0
+dataset = Dataset('data/BUS1.csv',windowWidth,overlapping)
+dataset = Dataset('data/bus2.csv',windowWidth,overlapping)
+dataset = Dataset('data/bus3.csv',windowWidth,overlapping)
+dataset = Dataset('data/bus4.csv',windowWidth,overlapping)
+dataset = Dataset('data/car1.csv',windowWidth,overlapping)
+dataset = Dataset('data/car2.csv',windowWidth,overlapping)
+dataset = Dataset('data/jeden.csv',windowWidth,overlapping)
+dataset = Dataset('data/dwa.csv',windowWidth,overlapping)
+dataset = Dataset('data/tram1.csv',windowWidth,overlapping)
+dataset = Dataset('data/tram2.csv',windowWidth,overlapping)
+
+
+
+
+
 
 
 

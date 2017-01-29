@@ -1,21 +1,16 @@
-import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+import numpy as np
 
+x = np.linspace(0, 6*np.pi, 100)
+y = np.sin(x)
 
-fig, ax = plt.subplots()
-line, = ax.plot(np.random.rand(10))
-ax.set_ylim(0, 1)
+# You probably won't need this if you're embedding things in a tkinter plot...
+plt.ion()
 
+fig = plt.figure()
+ax = fig.add_subplot(111)
+line1, = ax.plot(x, y, 'r-') # Returns a tuple of line objects, thus the comma
 
-def update(data):
-    line.set_ydata(data)
-    return line,
-
-
-def data_gen():
-    while True:
-        yield np.random.rand(10)
-
-ani = animation.FuncAnimation(fig, update, data_gen, interval=100)
-plt.show()
+for phase in np.linspace(0, 10*np.pi, 500):
+    line1.set_ydata(np.sin(x + phase))
+    fig.canvas.draw()
