@@ -23,7 +23,7 @@ Fs = 1/dt #częstotliwość próbkowania
 x = np.linspace(0.0, N*dt, N)
 
 y=np.sin( 2*np.pi*x)
-y = np.sin(2.0*np.pi*x)+ 0.1*np.sin(10.0 * 2.0*np.pi*x)+ np.sin(20.0 * 2.0*np.pi*x)+ np.sin(5 * 2.0*np.pi*x)
+y = np.sin(2.0*np.pi*x)+ 0.3*np.sin(10.0 * 2.0*np.pi*x)+ np.sin(20.0 * 2.0*np.pi*x)+ 0.5*np.sin(5 * 2.0*np.pi*x)
 
 
 #FOURIER
@@ -45,10 +45,19 @@ def findPeakFrequencies(xf,yf):
             alreadyAdded = 0
         else: #maleje
             if (alreadyAdded == 0):
-                peaksVector.append(xf[i-1]) # minus jeden bo bierzemy wcześniejszy
+                peakFrequency = xf[i-1]
+                peakAmplitude = yf[i-1]
+                print "dla " + str(peakFrequency)+ " Hz amplituda to: " + str(peakAmplitude)
+                peaksVector.append((peakFrequency, peakAmplitude)) # minus jeden bo bierzemy wcześniejszy
                 alreadyAdded = 1
         previousSample = yf[i]
     print peaksVector
+    peaksVector = sorted(peaksVector, key=lambda tup: tup[1], reverse = True)
+    print peaksVector
+    topPeaks = []
+    for i in range(3):
+        topPeaks.append(peaksVector[i][0])
+    print topPeaks
 
 findPeakFrequencies(xf,yf)
 

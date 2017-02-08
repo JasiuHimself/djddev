@@ -6,17 +6,11 @@ sudo pip install scipy
 sudo pip install matplotlib
 
 
-Co jest zrobione:
-
--zostało ogarnięte, że jak jest range (0,N) to znaczy for i=0;i<=N-1;i++, generalnie wtf
--wczytanie danych z pliku
-(-filtracja filtrem Butterwortha 10 rzędu)
--obliczenie normy ze względnu na brak znaczenia orientacji
-
-
-
 do zrobienia
+ogarnąć skalowanie energii razy 1000000 cos z tym trzeba zrobic
+i quickfixa z wariancją i 100000
 poprawić zapisywnaie sekwencji okuen na indexy okien w wektorze dla spójności
+???
 
 co trzeba zainstalować, żeby zainstalować theano i kerasa?
 
@@ -45,11 +39,3 @@ samochodem
 CELE
     żeby działało na sieciach neuronowych
     behavioral deep learning :D
-
-
-
-
-
-
-z acc x,y,z i gyro r,p,y tworzę wektory normWithoutDC dla każdego z osobna
-feature extraction is realised for these created vector.

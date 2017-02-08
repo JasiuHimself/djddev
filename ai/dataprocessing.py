@@ -108,19 +108,54 @@ class Dataset:
             return sumator/(len(signal)*pow(standardDeviation,4))
 
     def signalFrequencies(self,signal):
-        dt = 0.02# inter-sample time difference which is 20ms
-        fourier = np.fft.fft(signal)
-        frequencies = np.fft.fftfreq(len(signal), dt)
-        positive_frequencies = frequencies[np.where(frequencies >= 0)]
-        magnitudes = abs(fourier[np.where(frequencies >= 0)])  # magnitude spectrum
+        numberOfFrequencies = 3
+        dt=1.0/50.0 #0.02s = 1/50s sampling spacing
+        yf = abs(np.fft.rfft(signal))
+        xf = np.fft.rfftfreq(len(signal),dt) # FREQUENCIES
+        peaksVector = []
+        previousSample = 0
+        alreadyAdded = 0
+        for i in range(len(yf)):
+            if(yf[i]>=previousSample): #rośnie
+                alreadyAdded = 0
+            else: #maleje
+                if (alreadyAdded == 0):
+                    peakFrequency = xf[i-1]
+                    peakAmplitude = yf[i-1]
+                    peaksVector.append((peakFrequency, peakAmplitude))# minus jeden bo bierzemy wcześniejszy
+                    alreadyAdded = 1
+            previousSample = yf[i]
+        peaksVector = sorted(peaksVector, key=lambda tup: tup[1], reverse = True)
+        # print peaksVector
 
-        frequenciesVector = []
-        for i in range(3):
-            peak_frequency = np.argmax(magnitudes)
-            magnitudes[np.argmax(magnitudes)]=0
-            frequenciesVector.append(peak_frequency)
-        return frequenciesVector
+        # # MOŻNA SPRAWDZIĆ POPRAWNOŚĆ DZIAŁANIA PLOTUJĄC!
+        # x = np.linspace(0.0, len(signal)*dt, len(signal))
+        # plt.figure()
+        # plt.plot(x,signal)
+        # plt.ylabel('wartosc sygnalu')
+        # plt.xlabel('sekundy')
+        # plt.grid(True)
+        #
+        # plt.figure()
+        # plt.stem(xf,yf)
+        # plt.ylabel('wartosc amplitudy')
+        # plt.xlabel('Hz')
+        # plt.grid(True)
+        # plt.show()
 
+        if (len(peaksVector)<numberOfFrequencies): # nie udało się wyciągnąć częstotliwości, prawdopodobnie widmo jest monotoniczne
+            peaksVector = []
+            for i in range(numberOfFrequencies):
+                maxAmplitudeIndex = np.argmax(yf)
+                peakFrequency = xf[maxAmplitudeIndex]
+                peakAmplitude = yf[maxAmplitudeIndex]
+                peaksVector.append((peakFrequency, peakAmplitude))
+                yf[maxAmplitudeIndex] = 0
+
+        topPeaks = []
+        for i in range(numberOfFrequencies):
+            topPeaks.append(round(peaksVector[i][0],2)) # zaokraglenie do 2 miesca po przecinku
+        return topPeaks
 
 
     def window(self,signal, currentPositionInSignal = 0):
@@ -229,27 +264,28 @@ class Dataset:
                 # currentAccWindow = self.window(self.accNorm, windowBeginning)
                 currentGyrWindow = self.normWithoutDC(self.window(self.gyrNorm, windowBeginning))
                 # ACC
-                currentAccWindowEnergy = abs(self.signalEnergy(currentAccWindow))*100000000000000
+                currentAccWindowEnergy = abs(self.signalEnergy(currentAccWindow))*10000000000000000000
                 currentAccWindowStandardDeviation = self.signalStandardDeviation(currentAccWindow)
-                currentAccWindowVariance = self.signalVariance(currentAccWindow)
-                currentAccWindowSkewness = self.signalSkewness(currentAccWindow)
+                currentAccWindowVariance = self.signalVariance(currentAccWindow)*100000
+                currentAccWindowSkewness = self.signalSkewness(currentAccWindow)*1000
                 currentAccWindowKurtosis  = self.signalKurtosis(currentAccWindow)
                 currentAccWindowFrequencies = self.signalFrequencies(currentAccWindow)
                 # GYR
-                currentGyrWindowEnergy = abs(self.signalEnergy(currentGyrWindow))*100000000000000
+                currentGyrWindowEnergy = abs(self.signalEnergy(currentGyrWindow))*10000000000000000000
                 currentGyrWindowStandardDeviation = self.signalStandardDeviation(currentGyrWindow)
-                currentGyrWindowVariance = self.signalVariance(currentGyrWindow)
-                currentGyrWindowSkewness = self.signalSkewness(currentGyrWindow)
+                currentGyrWindowVariance = self.signalVariance(currentGyrWindow)*100000
+                currentGyrWindowSkewness = self.signalSkewness(currentGyrWindow)*1000
                 currentGyrWindowKurtosis  = self.signalKurtosis(currentGyrWindow)
                 currentGyrWindowFrequencies = self.signalFrequencies(currentGyrWindow)
 
-
+                # if (currentGyrWindowFrequencies == False or currentAccWindowFrequencies == False):
+                #     print "nieszczesne okno" +str(windowBeginning)
 
                 # print "okno            " + str(currentAccWindow) + "/okno"
                 # print "energy " + str(currentAccWindowEnergy)+" "+  str(currentAccWindowFrequencies)
 
                 currentRow = []
-                currentRow.append(self.class_vector[windowBeginning])
+
                 # ACC
                 currentRow.append(currentAccWindowEnergy)
                 currentRow.append(currentAccWindowStandardDeviation)
@@ -268,6 +304,9 @@ class Dataset:
                 for u in range(len(currentGyrWindowFrequencies)):
                     currentRow.append(currentGyrWindowFrequencies[u])
 
+                currentRow.append(self.class_vector[windowBeginning].replace("'",""))# CLASS without ''
+                # currentRow.append('CAR')# CLASS without ''
+
                 fileWriter.writerow(currentRow)
                 windowBeginning += self.windowWidth - self.overlapping
                 # print "......................................................................."
@@ -278,19 +317,48 @@ class Dataset:
 
 # nazwa pliku, szerokosc okna(CO NAJMNIEJ 2), overlapping
 # dataset = Dataset('nicimachanie.csv',250,0)
-windowWidth = 250
-overlapping = 0
-dataset = Dataset('data/BUS1.csv',windowWidth,overlapping)
-dataset = Dataset('data/bus2.csv',windowWidth,overlapping)
-dataset = Dataset('data/bus3.csv',windowWidth,overlapping)
-dataset = Dataset('data/bus4.csv',windowWidth,overlapping)
-dataset = Dataset('data/car1.csv',windowWidth,overlapping)
-dataset = Dataset('data/car2.csv',windowWidth,overlapping)
-dataset = Dataset('data/jeden.csv',windowWidth,overlapping)
-dataset = Dataset('data/dwa.csv',windowWidth,overlapping)
-dataset = Dataset('data/tram1.csv',windowWidth,overlapping)
-dataset = Dataset('data/tram2.csv',windowWidth,overlapping)
 
+
+
+windowWidth = 500
+overlapping = 0
+
+f = open('generatedDataset.csv', 'w')
+f.write('@relation transport\n\n')
+f.write('@attribute acc_energy numeric\n')
+f.write('@attribute acc_std_dev numeric\n')
+f.write('@attribute acc_var numeric\n')
+f.write('@attribute acc_skew numeric\n')
+f.write('@attribute acc_kurto numeric\n')
+f.write('@attribute acc_freq1 numeric\n')
+f.write('@attribute acc_freq2 numeric\n')
+f.write('@attribute acc_freq3 numeric\n')
+
+f.write('@attribute gyr_energy numeric\n')
+f.write('@attribute gyr_std_dev numeric\n')
+f.write('@attribute gyr_var numeric\n')
+f.write('@attribute gyr_skew numeric\n')
+f.write('@attribute gyr_kurto numeric\n')
+f.write('@attribute gyr_freq1 numeric\n')
+f.write('@attribute gyr_freq2 numeric\n')
+f.write('@attribute gyr_freq3 numeric\n')
+
+f.write('@attribute class {BUS, CAR, TRAM}\n')
+f.write('@data\n')
+f.close()
+
+# dataset = Dataset('data/car1.csv',windowWidth,overlapping)
+dataset = Dataset('data/another.csv',windowWidth,overlapping)
+dataset = Dataset('data/tram1.csv',windowWidth,overlapping)
+# dataset = Dataset('data/bus3.csv',windowWidth,overlapping)
+# dataset = Dataset('data/car3.csv',windowWidth,overlapping)
+# dataset = Dataset('data/bus2.csv',windowWidth,overlapping)
+dataset = Dataset('data/dwa.csv',windowWidth,overlapping)
+# dataset = Dataset('data/BUS1.csv',windowWidth,overlapping)
+dataset = Dataset('data/jeden.csv',windowWidth,overlapping)
+dataset = Dataset('data/tram2.csv',windowWidth,overlapping)
+dataset = Dataset('data/bus4.csv',windowWidth,overlapping)
+# dataset = Dataset('data/car2.csv',windowWidth,overlapping)
 
 
 
