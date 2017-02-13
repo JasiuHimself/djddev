@@ -18,7 +18,12 @@ sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython
 
 sudo pip install theano
 sudo pip install keras
-i jest ok
+
+ALBO
+sudo pip install tensorflow-gpu
+  w przypadku instalacji na moim serwerze raczej bez gpu :)
+sudo pip install tflearn
+
 
 
 

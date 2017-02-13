@@ -346,25 +346,28 @@ f.write('@attribute gyr_freq3 numeric\n')
 f.write('@attribute class {BUS, CAR, TRAM}\n')
 f.write('@data\n')
 f.close()
-
+# #
 # dataset = Dataset('data/car1.csv',windowWidth,overlapping)
-dataset = Dataset('data/another.csv',windowWidth,overlapping)
-dataset = Dataset('data/tram1.csv',windowWidth,overlapping)
-# dataset = Dataset('data/bus3.csv',windowWidth,overlapping)
-# dataset = Dataset('data/car3.csv',windowWidth,overlapping)
-# dataset = Dataset('data/bus2.csv',windowWidth,overlapping)
-dataset = Dataset('data/dwa.csv',windowWidth,overlapping)
-# dataset = Dataset('data/BUS1.csv',windowWidth,overlapping)
-dataset = Dataset('data/jeden.csv',windowWidth,overlapping)
-dataset = Dataset('data/tram2.csv',windowWidth,overlapping)
-dataset = Dataset('data/bus4.csv',windowWidth,overlapping)
 # dataset = Dataset('data/car2.csv',windowWidth,overlapping)
-
-
-
-
-
-
+# dataset = Dataset('data/car3.csv',windowWidth,overlapping)
+# dataset = Dataset('data/car4.csv',windowWidth,overlapping)
+# dataset = Dataset('data/car5.csv',windowWidth,overlapping)
+# dataset = Dataset('data/car6.csv',windowWidth,overlapping)
+#
+#
+# dataset = Dataset('data/bus1.csv',windowWidth,overlapping)
+# dataset = Dataset('data/bus2.csv',windowWidth,overlapping)
+# dataset = Dataset('data/bus3.csv',windowWidth,overlapping)
+# dataset = Dataset('data/bus4.csv',windowWidth,overlapping)
+# dataset = Dataset('data/bus5.csv',windowWidth,overlapping)
+# dataset = Dataset('data/bus6.csv',windowWidth,overlapping)
+# dataset = Dataset('data/bus7.csv',windowWidth,overlapping)
+#
+#
+# dataset = Dataset('data/tram1.csv',windowWidth,overlapping)
+# dataset = Dataset('data/tram2.csv',windowWidth,overlapping)
+dataset = Dataset('data/tram3.csv',windowWidth,overlapping)
+# dataset = Dataset('data/tram4.csv',windowWidth,overlapping)
 
 #
 #
