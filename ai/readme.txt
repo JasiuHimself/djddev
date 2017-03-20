@@ -12,6 +12,10 @@ i quickfixa z wariancją i 100000
 poprawić zapisywnaie sekwencji okuen na indexy okien w wektorze dla spójności
 ???
 
+KERAS TO FRAMEWORK DO
+  THEANO
+  TENSORFLOW
+
 co trzeba zainstalować, żeby zainstalować theano i kerasa?
 
 sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
@@ -23,6 +27,10 @@ ALBO
 sudo pip install tensorflow-gpu
   w przypadku instalacji na moim serwerze raczej bez gpu :)
 sudo pip install tflearn
+
+
+
+używam tensorflow
 
 
 
