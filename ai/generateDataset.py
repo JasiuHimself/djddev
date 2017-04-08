@@ -19,7 +19,6 @@ class Dataset:
         self.windowWidth = windowWidth
         self.overlapping = self.overlappingCount(windowWidth,overlappingPercent )
         self.readDataFile(self.dataFileName)
-        # to powninno być w oknie przesuwnym
         self.accNorm = self.norm(self.accX,self.accY,self.accZ)
         self.gyrNorm = self.norm(self.gyrR,self.gyrP,self.gyrY)
         self.currentPositionInSignal = 0
@@ -193,8 +192,6 @@ class Dataset:
             windowBeginning += windowWidth - overlapping
         return windowsCount
 
-
-
     def returnWindowsCountAndNewClassBeginning(self, windowBeginning = 0):
         windowsCount = 0    # NIE TYKAĆ TEGO WARUNKU - JEST DOBRY (WHILE PONIŻEJ)
         newClassBeginning =0
@@ -224,8 +221,6 @@ class Dataset:
         # print "pierwszy element nowe klasy: " + str(newClassBeginning) + 'to' + self.class_vector[newClassBeginning] + "ilosc okien:" + str(windowCount)
         return windowsCount, newClassBeginning
 
-
-
     def calculateClassesPositionsAndWindowsConunts(self):
         thereIsNextClass = True
         windowBeginning = 0
@@ -243,8 +238,6 @@ class Dataset:
 
         # for classIterator in range (len(self.classesPositionsAndWindowsCounts)):
         #      self.iterateThroughWindows(classIterator)
-
-
 
 # classBeginning, windowsCount
     def generateDataset(self):
@@ -286,6 +279,7 @@ class Dataset:
 
                 currentRow = []
 
+
                 # ACC
                 currentRow.append(currentAccWindowEnergy)
                 currentRow.append(currentAccWindowStandardDeviation)
@@ -316,36 +310,53 @@ class Dataset:
 
 
 # nazwa pliku, szerokosc okna(CO NAJMNIEJ 2), overlapping
-# dataset = Dataset('nicimachanie.csv',250,0)
-
-
-
+#################################SETTINGS#################################################################
 windowWidth = 500
 overlapping = 0
+fileName = 'generatedDataset.csv'
+generateForWEKA = 0;
+generateWithColumnNames = 1;
 
-f = open('generatedDataset.csv', 'w')
-f.write('@relation transport\n\n')
-f.write('@attribute acc_energy numeric\n')
-f.write('@attribute acc_std_dev numeric\n')
-f.write('@attribute acc_var numeric\n')
-f.write('@attribute acc_skew numeric\n')
-f.write('@attribute acc_kurto numeric\n')
-f.write('@attribute acc_freq1 numeric\n')
-f.write('@attribute acc_freq2 numeric\n')
-f.write('@attribute acc_freq3 numeric\n')
 
-f.write('@attribute gyr_energy numeric\n')
-f.write('@attribute gyr_std_dev numeric\n')
-f.write('@attribute gyr_var numeric\n')
-f.write('@attribute gyr_skew numeric\n')
-f.write('@attribute gyr_kurto numeric\n')
-f.write('@attribute gyr_freq1 numeric\n')
-f.write('@attribute gyr_freq2 numeric\n')
-f.write('@attribute gyr_freq3 numeric\n')
+# for now the data is being appended to file!!!!!!!! keep that in mind
 
-f.write('@attribute class {BUS, CAR, TRAM, TRAIN}\n')
-f.write('@data\n')
-f.close()
+
+#################################SETTINGS################################################################
+
+
+
+
+if (generateForWEKA):
+    f = open(fileName, 'w')
+    f.write('@relation transport\n\n')
+    f.write('@attribute acc_energy numeric\n')
+    f.write('@attribute acc_std_dev numeric\n')
+    f.write('@attribute acc_var numeric\n')
+    f.write('@attribute acc_skew numeric\n')
+    f.write('@attribute acc_kurto numeric\n')
+    f.write('@attribute acc_freq1 numeric\n')
+    f.write('@attribute acc_freq2 numeric\n')
+    f.write('@attribute acc_freq3 numeric\n')
+
+    f.write('@attribute gyr_energy numeric\n')
+    f.write('@attribute gyr_std_dev numeric\n')
+    f.write('@attribute gyr_var numeric\n')
+    f.write('@attribute gyr_skew numeric\n')
+    f.write('@attribute gyr_kurto numeric\n')
+    f.write('@attribute gyr_freq1 numeric\n')
+    f.write('@attribute gyr_freq2 numeric\n')
+    f.write('@attribute gyr_freq3 numeric\n')
+
+    f.write('@attribute class {BUS, CAR, TRAM, TRAIN}\n')
+    f.write('@data\n')
+    f.close()
+
+
+if (generateWithColumnNames):
+        f = open(fileName, 'w')
+        f.write('acc_energy, acc_std_dev, acc_var, acc_skew, acc_kurto, acc_freq1, acc_freq2, acc_freq3, gyr_energy, gyr_std_dev, gyr_var, gyr_skew, gyr_kurto, gyr_freq1, gyr_freq2, gyr_freq3, class\n')
+        f.close()
+
 
 dataset = Dataset('data/car1.csv',windowWidth,overlapping)
 dataset = Dataset('data/car2.csv',windowWidth,overlapping)
@@ -366,49 +377,3 @@ dataset = Dataset('data/tram3.csv',windowWidth,overlapping)
 dataset = Dataset('data/tram4.csv',windowWidth,overlapping)
 dataset = Dataset('data/train1.csv',windowWidth,overlapping)
 dataset = Dataset('data/train2.csv',windowWidth,overlapping)
-
-
-
-#
-#
-# plt.figure()
-# plt.subplot(2,1,1)
-# plt.hold(True)
-# plt.grid(True)
-#
-# plt.plot(accNormDC)
-
-
-# Zaznacznie dzialania okienek
-#
-# typyPlotu = ['x', 'o', '*', '+', 's', 'd', 'v', '^', '<']
-#
-# for i in range(0,9):
-#     wycinek, pozycja = window(accNormDC,10,50,i)
-#     czasik = createTimeVectorToPlotWindow(10,50,i)
-#     plt.plot(czasik,wycinek, typyPlotu[i])
-
-# plotowanie energii
-# for i in range(0, signalRangeInWindowsCount(accNormDC, windowWidth, overlappingPercent)):
-#     energy = signalEnergy(window(accNormDC,windowWidth,overlappingPercent,i))
-#     energyWindow = np.empty(windowWidth);
-#     energyWindow.fill(energy)
-#     plt.plot(createTimeVectorToPlotWindow(windowWidth,overlappingPercent,i),energyWindow,'g-')
-
-# plotowanie wariancji
-# for i in range(0, signalRangeInWindowsCount(accNormDC, windowWidth, overlappingPercent)):
-#     variance = signalVariance(window(accNormDC,windowWidth,overlappingPercent,i))
-#     print variance
-#     varianceWindow = np.empty(windowWidth);
-#     varianceWindow.fill(variance)
-#     plt.plot(createTimeVectorToPlotWindow(windowWidth,overlappingPercent,i),varianceWindow,'r-')
-
-# GYROSCOPE
-
-# plt.subplot(2,1,2)
-# plt.hold(True)
-# plt.plot(gyrNormDC)
-
-
-
-# plt.show()
